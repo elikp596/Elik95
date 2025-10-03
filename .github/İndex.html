@@ -1,1 +1,134 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9f7ef;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .coordinates {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GPS Test - Yerinizi Tapın</h1>
+        <p>Bu səhifə server tələb etmədən GPS ilə işləyir.</p>
+        
+        <button onclick="getLocation()">📍 Mənim Yerimi Tap</button>
+        
+        <div id="result"></div>
+        
+        <div style="margin-top: 20px; font-size: 14px; color: #666;">
+            <p><strong>Qeyd:</strong> Bu test üçün:</p>
+            <ul>
+                <li>Brauzeriniz GPS istifadəsinə icazə verməlidir</li>
+                <li>HTTPS tələb olunmur</li>
+                <li>Server tələb olunmur</li>
+            </ul>
+        </div>
+    </div>
 
+    <script>
+        function getLocation() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>📍 Yeriniz axtarılır...</p>';
+            
+            if (!navigator.geolocation) {
+                resultDiv.innerHTML = '<div class="error">Brauzeriniz GPS-i dəstəkləmir</div>';
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <h3>✅ Yeriniz tapıldı!</h3>
+                            <div class="coordinates">Enlik: ${lat.toFixed(6)}</div>
+                            <div class="coordinates">Uzunluq: ${lng.toFixed(6)}</div>
+                            <div style="margin-top: 10px; color: #666;">
+                                Dəqiqlik: ±${accuracy.toFixed(1)} metr
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" 
+                                   style="background: #28a745; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px;">
+                                   📍 Google Maps-də aç
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                },
+                function(error) {
+                    let errorMessage = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'GPS istifadəsinə icazə verilmədi';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Yer məlumatı mövcud deyil';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Yer tapma vaxtı bitdi';
+                            break;
+                        default:
+                            errorMessage = 'Naməlum xəta';
+                    }
+                    resultDiv.innerHTML = `<div class="error">❌ Xəta: ${errorMessage}</div>`;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+        
+        // Sayt yüklənəndə avtomatik yer tapma (isteğe bağlı)
+        // window.onload = getLocation;
+    </script>
+</body>
+  </html>
